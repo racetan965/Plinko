@@ -414,7 +414,7 @@ function goToResult() {
 ======================= */
 async function handleDrop() {
   sndClick.currentTime = 0;
-    sndClick.play().catch(()=>{});
+  sndClick.play().catch(()=>{});
 
   if (cashedOut || finished) {
     showToast("الجلسة منتهية");
@@ -539,7 +539,8 @@ let landedHandled = false;
 
 // إطلاق الكرة حسب الـ multiplier
 function launchBallForMultiplier(mult) {
-  playDrop();
+  sndClick.currentTime = 0;
+  sndClick.play().catch(()=>{});
 
   const indexes = [];
   BIN_MULTIPLIERS.forEach((m, i) => {
