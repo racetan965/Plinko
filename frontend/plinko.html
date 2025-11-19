@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>لعبة بلنكو - 5 دنانير</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* خلفية مجرة */
+      background: radial-gradient(circle at top, #020617 0%, #000014 40%, #020617 70%, #000000 100%);
+      color: #f9fafb;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 420px;
+      aspect-ratio: 9 / 16;
+      background: radial-gradient(circle at top, #020617 0%, #020617 30%, #020617 100%);
+      border-radius: 24px;
+      border: 1px solid rgba(94, 234, 212, 0.35);
+      box-shadow: 0 20px 80px rgba(0, 0, 0, 0.9);
+      padding: 10px 10px 14px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+
+    .title {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #22d3ee, #a855f7, #f97316);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: #cbd5f5;
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      margin-bottom: 6px;
+    }
+
+    .stat-card {
+      flex: 1;
+      background: radial-gradient(circle at top left, rgba(15,23,42,0.95), rgba(15,23,42,0.9));
+      border-radius: 14px;
+      padding: 8px 10px;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.9);
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: #9ca3af;
+    }
+
+    .stat-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e0f2fe;
+    }
+
+    .bet-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .bet-label {
+      font-size: 11px;
+      color: #9ca3af;
+      white-space: nowrap;
+    }
+
+    .bet-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+      justify-content: flex-end;
+    }
+
+    .bet-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(94, 234, 212, 0.7);
+      background: radial-gradient(circle at top, rgba(15,23,42,0.9), rgba(15,23,42,1));
+      color: #e5e7eb;
+      padding: 3px 9px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.12s ease;
+      box-shadow: 0 3px 8px rgba(15,23,42,0.9);
+    }
+
+    .bet-btn:active {
+      transform: translateY(1px) scale(0.97);
+      box-shadow: 0 1px 4px rgba(15,23,42,0.9);
+    }
+
+    .bet-value-pill {
+      border-radius: 999px;
+      border: 1px solid rgba(129, 140, 248, 0.8);
+      background: radial-gradient(circle at top, rgba(15,23,42,0.95), rgba(30,64,175,0.85));
+      color: #e5e7eb;
+      padding: 4px 10px;
+      font-size: 11px;
+      white-space: nowrap;
+      min-width: 70px;
+      text-align: center;
+    }
+
+    .hint-text {
+      font-size: 10px;
+      color: #9ca3af;
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+
+    .canvas-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(59, 130, 246, 0.8);
+      background: radial-gradient(circle at top, #020617, #020617);
+      position: relative;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: radial-gradient(circle at top, #020617, #020617);
+    }
+
+    .controls-row-main {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      margin-bottom: 4px;
+    }
+
+    .main-btn {
+      flex: 1;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 9px 0;
+      font-size: 13px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #22c55e, #a3e635);
+      color: #02131b;
+      box-shadow: 0 10px 25px rgba(34, 197, 94, 0.45);
+      transition: transform 0.08s ease, box-shadow 0.08s ease, opacity 0.1s ease;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    #cashoutBtn {
+      background: linear-gradient(135deg, #f97316, #facc15);
+      box-shadow: 0 10px 25px rgba(248, 181, 0, 0.45);
+      color: #111827;
+    }
+
+    .main-btn:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.8);
+    }
+
+    .main-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    .status-pill {
+      font-size: 10px;
+      border-radius: 999px;
+      padding: 5px 8px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.8);
+      color: #e5e7eb;
+      min-width: 80px;
+      text-align: center;
+      white-space: nowrap;
+      margin-bottom: 4px;
+    }
+
+    .status-pill.animating {
+      border-color: rgba(59, 130, 246, 0.85);
+      color: #bfdbfe;
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .status-pill.finished {
+      border-color: rgba(234, 179, 8, 0.9);
+      color: #facc15;
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .footer {
+      font-size: 10px;
+      color: #9ca3af;
+      margin-top: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .session-info {
+      white-space: nowrap;
+    }
+
+    .footer-actions {
+      display: flex;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .reset-btn {
+      font-size: 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: transparent;
+      color: #e5e7eb;
+      padding: 4px 8px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .reset-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      bottom: 10px;
+      transform: translateX(-50%);
+      font-size: 11px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      padding: 6px 10px;
+      border-radius: 999px;
+      color: #e5e7eb;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="title">PLINKO RACETAN</div>
+      <div class="subtitle">
+        رصيد البداية <strong>٥ د.ك</strong> – تقدر تغيّر قيمة الرهان (+ أو - ١ د.ك) – كل كرة تنزل حسب قيمة رهانك الحالية.
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">الرصيد الحالي</div>
+        <div class="stat-value" id="balanceDisplay">5.00 د.ك</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">الكرات الملعوبة</div>
+        <div class="stat-value" id="ballsDisplay">0 كرة</div>
+      </div>
+    </div>
+
+    <div class="bet-row">
+      <div class="bet-label">قيمة الرهان لكل كرة</div>
+      <div class="bet-controls">
+        <button class="bet-btn" id="betMinusBtn">- ١ د.ك</button>
+        <div class="bet-value-pill" id="betValueDisplay">1 د.ك</div>
+        <button class="bet-btn" id="betPlusBtn">+ ١ د.ك</button>
+      </div>
+    </div>
+
+    <div class="hint-text">
+      • كل ضغطة على <strong>نزّل الكرة</strong> تنطلب من السيرفر (ما في حسابات محليّة).<br>
+      • تقدر تنزّل أكثر من كرة في نفس الوقت، وكل كرة بسرعة مختلفة شوي.<br>
+      • اضغط <strong>كاش آوت</strong> عشان تثبّت رصيدك الحالي – بعدها ما تقدر تكمل نفس الجلسة.
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="plinkoCanvas" width="360" height="640"></canvas>
+      <!-- Toast -->
+      <div class="toast" id="toast"></div>
+    </div>
+
+    <div class="controls-row-main">
+      <button class="main-btn" id="dropBtn">نزّل الكرة</button>
+      <button class="main-btn" id="cashoutBtn">كاش آوت</button>
+    </div>
+
+    <div class="status-pill" id="statusPill">جاري الاتصال بالسيرفر...</div>
+
+    <div class="footer">
+      <div class="session-info" id="sessionInfo">الجلسة ١ – الكرات الملعوبة: ٠</div>
+      <div class="footer-actions">
+        <button class="reset-btn" id="resetBtn">جلسة جديدة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- الأصوات (غير المسارات حسب ملفاتك) -->
+  <audio id="sndDrop" src="sounds/drop.mp3" preload="auto"></audio>
+  <audio id="sndLandSmall" src="sounds/land_small.mp3" preload="auto"></audio>
+  <audio id="sndLandZero" src="sounds/land_zero.mp3" preload="auto"></audio>
+  <audio id="sndBigWin" src="sounds/big_win.mp3" preload="auto"></audio>
+
+  <script>
+    // ============================
+    // إعداد الاتصال بالباكند
+    // ============================
+    const API_BASE = ""; // عدلها حسب السيرفر
+    const session_token = localStorage.getItem("session_token");
+    if (!session_token) {
+      window.location.href = "/"; // يرجع لصفحة تسجيل الدخول
+    }
+
+    //let sessionToken = null;
+
+    // ============================
+    // Config اللعبة (نفس ملفك تقريباً)
+    // ============================
+    const INITIAL_BALANCE = 5.0;
+    const MIN_BET = 1.0;
+    const MAX_BET = 5.0;
+
+    const SLOT_MULTIPLIERS = [
+      1000, 100, 50, 25, 10, 5, 2, 1, 0, 0,
+      1, 2, 5, 10, 25, 50, 100, 1000
+    ];
+    const SLOT_COUNT = SLOT_MULTIPLIERS.length;
+
+    const PRECOMPUTED_PATHS_PER_SLOT = 80;
+    const BIG_WIN_MULTIPLIER_THRESHOLD = 25;
+
+    // Canvas & DOM
+    const canvas = document.getElementById("plinkoCanvas");
+    const ctx = canvas.getContext("2d");
+    const width = canvas.width;
+    const height = canvas.height;
+
+    const balanceDisplay = document.getElementById("balanceDisplay");
+    const ballsDisplay = document.getElementById("ballsDisplay");
+    const dropBtn = document.getElementById("dropBtn");
+    const cashoutBtn = document.getElementById("cashoutBtn");
+    const statusPill = document.getElementById("statusPill");
+    const sessionInfo = document.getElementById("sessionInfo");
+    const resetBtn = document.getElementById("resetBtn");
+    const toastEl = document.getElementById("toast");
+    const betMinusBtn = document.getElementById("betMinusBtn");
+    const betPlusBtn = document.getElementById("betPlusBtn");
+    const betValueDisplay = document.getElementById("betValueDisplay");
+
+    const sndDrop = document.getElementById("sndDrop");
+    const sndLandSmall = document.getElementById("sndLandSmall");
+    const sndLandZero = document.getElementById("sndLandZero");
+    const sndBigWin = document.getElementById("sndBigWin");
+
+    function playSafe(audio) {
+      try {
+        audio.currentTime = 0;
+        audio.play();
+      } catch (e) {}
+    }
+
+    // Layout
+    const ballRadius = 9;   // شوي أكبر عشان شكل العملة
+    const pegRadius = 5;
+    const wallThickness = 5;
+
+    const topMargin = 30;
+    const bottomSlotHeight = 110;
+    const slotY = height - bottomSlotHeight;
+    const slotWidth = width / SLOT_COUNT;
+
+    const pegRows = 13;
+    const baseCount = pegRows;
+    const pegSpacingY = (slotY - topMargin - 40) / (pegRows - 1);
+
+    // State
+    let pegs = [];
+    let pegGrid = [];
+
+    let balance = INITIAL_BALANCE;
+    let displayedBalance = INITIAL_BALANCE;
+    let ballsPlayed = 0;
+    let sessionNumber = 1;
+    let cashedOut = false;
+    let stakePerBall = 1.0;
+
+    let balls = [];
+    let highlightSlotIndex = -1;
+    let highlightUntil = 0;
+    let floatingTexts = [];
+    let particles = [];
+
+    let balanceAnimFrame = null;
+
+    let bigWinUntil = 0;
+    let bigWinText = "";
+
+    let precomputedPathsBySlot = [];
+
+    // Helpers
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function formatKWD(v) {
+      return v.toFixed(2) + " د.ك";
+    }
+
+    function updateUI() {
+      balanceDisplay.textContent = formatKWD(displayedBalance);
+      ballsDisplay.textContent = `${ballsPlayed} كرة`;
+      sessionInfo.textContent = `الجلسة ${sessionNumber} – الكرات الملعوبة: ${ballsPlayed}`;
+      betValueDisplay.textContent = `${stakePerBall.toFixed(0)} د.ك`;
+    }
+
+    function setStatus(text, mode = "idle") {
+      statusPill.textContent = text;
+      statusPill.classList.remove("animating", "finished");
+      if (mode === "animating") statusPill.classList.add("animating");
+      if (mode === "finished") statusPill.classList.add("finished");
+    }
+
+    function showToast(text, duration = 1800) {
+      toastEl.textContent = text;
+      toastEl.classList.add("visible");
+      setTimeout(() => toastEl.classList.remove("visible"), duration);
+    }
+
+    function animateBalanceTo(target, duration = 600) {
+      if (balanceAnimFrame != null) {
+        cancelAnimationFrame(balanceAnimFrame);
+        balanceAnimFrame = null;
+      }
+      const start = displayedBalance;
+      const diff = target - start;
+      const startTime = performance.now();
+
+      function step(now) {
+        const t = Math.min(1, (now - startTime) / duration);
+        displayedBalance = start + diff * t;
+        balanceDisplay.textContent = formatKWD(displayedBalance);
+        if (t < 1) {
+          balanceAnimFrame = requestAnimationFrame(step);
+        } else {
+          displayedBalance = target;
+          balanceDisplay.textContent = formatKWD(displayedBalance);
+        }
+      }
+      balanceAnimFrame = requestAnimationFrame(step);
+    }
+
+    function createFloatingText(x, y, text, color) {
+      floatingTexts.push({ x, y, text, color, alpha: 1, vy: -0.4 });
+    }
+
+    function triggerBigWin(multiplier, winAmount) {
+      bigWinUntil = performance.now() + 1300;
+      bigWinText = `${multiplier}x | +${winAmount.toFixed(2)} د.ك`;
+      playSafe(sndBigWin);
+    }
+
+    function addParticlesBurst(x, y, color) {
+      for (let i = 0; i < 18; i++) {
+        const angle = (Math.PI * 2 * i) / 18;
+        const speed = 0.7 + Math.random() * 0.6;
+        particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 0.2,
+          alpha: 1,
+          size: 2 + Math.random() * 1.5,
+          color
+        });
+      }
+    }
+
+    // Peg grid
+    function generatePegs() {
+      pegs = [];
+      pegGrid = [];
+
+      const usableWidth = width - 2 * (wallThickness + ballRadius * 2);
+      const spacingX = usableWidth / (baseCount - 1);
+      const minX = wallThickness + ballRadius * 2;
+
+      for (let row = 0; row < pegRows; row++) {
+        const rowCount = 1 + row;
+        const y = topMargin + row * pegSpacingY;
+
+        const rowPegs = [];
+        const rowWidth = (rowCount - 1) * spacingX;
+        let startX = width / 2 - rowWidth / 2;
+
+        for (let i = 0; i < rowCount; i++) {
+          let x = startX + i * spacingX;
+          x = clamp(x, minX, width - minX);
+          const peg = { x, y, row, col: rowPegs.length };
+          rowPegs.push(peg);
+          pegs.push(peg);
+        }
+        pegGrid.push(rowPegs);
+      }
+    }
+
+    // Paths
+    function spacingRandomFactor(progress) {
+      return (1 - progress) * (slotWidth * 0.5);
+    }
+
+    function generatePegPathToTarget(targetSlotIndex) {
+      const path = [];
+
+      const groundY = height - 8 - ballRadius;
+      const targetX = (targetSlotIndex + 0.5) * slotWidth;
+
+      const minX = wallThickness + ballRadius + 4;
+      const maxX = width - wallThickness - ballRadius - 4;
+
+      const firstRow = pegGrid[0];
+      const firstPeg = firstRow[0];
+      const startX = clamp(firstPeg.x, minX, maxX);
+
+      const keypoints = [];
+      keypoints.push({ x: startX, y: topMargin - 35 });
+      keypoints.push({ x: firstPeg.x, y: firstPeg.y });
+
+      let currentX = firstPeg.x;
+
+      for (let row = 1; row < pegGrid.length; row++) {
+        const rowPegs = pegGrid[row];
+        if (!rowPegs || !rowPegs.length) continue;
+
+        let bestIdx = 0;
+        let bestScore = Infinity;
+        for (let i = 0; i < rowPegs.length; i++) {
+          const peg = rowPegs[i];
+          const distToPrev = Math.abs(peg.x - currentX);
+          const distToTarget = Math.abs(peg.x - targetX);
+
+          const progress = row / pegRows;
+          const weightTarget = 0.3 + 0.7 * progress;
+          const weightPrev = 1.0 - 0.4 * progress;
+
+          const noise = Math.random() * spacingRandomFactor(progress);
+          const score = distToPrev * weightPrev + distToTarget * weightTarget + noise;
+
+          if (score < bestScore) {
+            bestScore = score;
+            bestIdx = i;
+          }
+        }
+
+        const chosenPeg = rowPegs[bestIdx];
+        currentX = chosenPeg.x;
+        keypoints.push({ x: chosenPeg.x, y: chosenPeg.y });
+      }
+
+      const lastPeg = keypoints[keypoints.length - 1];
+      keypoints.push({ x: lastPeg.x, y: slotY - 18 });
+      keypoints.push({ x: targetX, y: groundY });
+
+      for (let i = 0; i < keypoints.length - 1; i++) {
+        const p0 = keypoints[i];
+        const p1 = keypoints[i + 1];
+
+        const dist = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+        const steps = clamp(Math.round(dist / 10), 10, 20);
+
+        const isPegSegment = i > 0 && i < keypoints.length - 3;
+
+        for (let s = 0; s < steps; s++) {
+          const t = s / steps;
+          const easeT = t * t * (3 - 2 * t);
+
+          let x = p0.x + (p1.x - p0.x) * easeT;
+          let y = p0.y + (p1.y - p0.y) * easeT;
+
+          if (isPegSegment) {
+            const bump = Math.sin(t * Math.PI) * 6;
+            y -= bump;
+          }
+
+          x = clamp(x, minX, maxX);
+          path.push({ x, y });
+        }
+      }
+
+      const last = keypoints[keypoints.length - 1];
+      path.push({ x: last.x, y: last.y });
+
+      return path;
+    }
+
+    function precomputePaths() {
+      precomputedPathsBySlot = [];
+      for (let slotIndex = 0; slotIndex < SLOT_COUNT; slotIndex++) {
+        const arr = [];
+        for (let i = 0; i < PRECOMPUTED_PATHS_PER_SLOT; i++) {
+          const path = generatePegPathToTarget(slotIndex);
+          arr.push(path);
+        }
+        precomputedPathsBySlot.push(arr);
+      }
+    }
+
+    // Drawing slots
+    function getSlotGradient(multiplier, x, y, w, h, highlighted) {
+      const grad = ctx.createLinearGradient(x, y, x, y + h);
+      let c1, c2;
+      if (multiplier === 0) {
+        c1 = highlighted ? "#7f1d1d" : "#020617";
+        c2 = highlighted ? "#b91c1c" : "#111827";
+      } else if (multiplier === 1 || multiplier === 2) {
+        c1 = highlighted ? "#065f46" : "#064e3b";
+        c2 = highlighted ? "#16a34a" : "#047857";
+      } else if ([5, 10, 25].includes(multiplier)) {
+        c1 = highlighted ? "#1d4ed8" : "#1e3a8a";
+        c2 = highlighted ? "#4f46e5" : "#3730a3";
+      } else if ([50, 100].includes(multiplier)) {
+        c1 = highlighted ? "#c2410c" : "#7c2d12";
+        c2 = highlighted ? "#ea580c" : "#9a3412";
+      } else if (multiplier === 1000) {
+        c1 = highlighted ? "#fbbf24" : "#854d0e";
+        c2 = highlighted ? "#f59e0b" : "#b45309";
+      } else {
+        c1 = "#020617";
+        c2 = "#020617";
+      }
+      grad.addColorStop(0, c1);
+      grad.addColorStop(1, c2);
+      return grad;
+    }
+
+    function drawBoard() {
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+      bgGrad.addColorStop(0, "#020617");
+      bgGrad.addColorStop(1, "#000000");
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, width, height);
+
+      // walls
+      ctx.fillStyle = "rgba(148, 163, 184, 0.6)";
+      ctx.fillRect(0, topMargin - 20, wallThickness, height - topMargin + 20);
+      ctx.fillRect(width - wallThickness, topMargin - 20, wallThickness, height - topMargin + 20);
+
+      // pegs
+      for (const peg of pegs) {
+        const glowRadius = pegRadius + 2.5;
+        const glowGrad = ctx.createRadialGradient(
+          peg.x, peg.y, 0,
+          peg.x, peg.y, glowRadius
+        );
+        glowGrad.addColorStop(0, "rgba(248, 250, 252, 0.9)");
+        glowGrad.addColorStop(1, "rgba(56, 189, 248, 0.05)");
+        ctx.fillStyle = glowGrad;
+        ctx.beginPath();
+        ctx.arc(peg.x, peg.y, glowRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#e5e7eb";
+        ctx.beginPath();
+        ctx.arc(peg.x, peg.y, pegRadius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // slots
+      const now = performance.now();
+      for (let i = 0; i < SLOT_COUNT; i++) {
+        const m = SLOT_MULTIPLIERS[i];
+        const x = i * slotWidth;
+        const y = slotY;
+        const highlighted = (i === highlightSlotIndex && now < highlightUntil);
+
+        ctx.fillStyle = getSlotGradient(m, x, y, slotWidth, bottomSlotHeight, highlighted);
+        ctx.fillRect(x, y, slotWidth, bottomSlotHeight);
+
+        ctx.strokeStyle = "rgba(15, 23, 42, 0.9)";
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y + bottomSlotHeight);
+        ctx.stroke();
+
+        ctx.fillStyle = "#f9fafb";
+        ctx.font = highlighted ? "bold 14px system-ui" : "bold 12px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        const label = m.toString() + "x";
+        const chars = label.split("");
+        const lineHeight = 11;
+        const totalH = chars.length * lineHeight;
+        const centerX = x + slotWidth / 2;
+        let baseY = y + bottomSlotHeight / 2 - totalH / 2 + lineHeight / 2;
+        for (let ci = 0; ci < chars.length; ci++) {
+          ctx.fillText(chars[ci], centerX, baseY + ci * lineHeight);
+        }
+      }
+
+      // line above slots
+      ctx.strokeStyle = "rgba(248, 181, 0, 0.8)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, slotY);
+      ctx.lineTo(width, slotY);
+      ctx.stroke();
+
+      // balls (عملة ذهبية سداسية مع جلو)
+      for (const ball of balls) {
+        if (!ball.active) continue;
+        const idx = Math.min(Math.floor(ball.progress), ball.path.length - 1);
+        const p = ball.path[idx];
+        if (!p) continue;
+
+        const jitterX = Math.sin(ball.jitterPhase + ball.progress * 0.15) * 0.8;
+        const drawX = p.x + jitterX;
+        const drawY = p.y;
+
+        const grad = ctx.createRadialGradient(
+          drawX - 3, drawY - 3, 0,
+          drawX, drawY, ballRadius + 2
+        );
+        grad.addColorStop(0, "#fef9c3");
+        grad.addColorStop(0.4, "#facc15");
+        grad.addColorStop(1, "#b45309");
+
+        ctx.save();
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = "rgba(250, 250, 250, 0.9)";
+        ctx.lineWidth = 1.3;
+
+        // رسم شكل سداسي تقريباً مع زوايا ناعمة
+        ctx.beginPath();
+        const sides = 6;
+        for (let i = 0; i <= sides; i++) {
+          const ang = (Math.PI * 2 * i) / sides;
+          const r = ballRadius;
+          const x = drawX + Math.cos(ang) * r;
+          const y = drawY + Math.sin(ang) * r;
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // floating texts
+      for (const ft of floatingTexts) {
+        ctx.save();
+        ctx.globalAlpha = ft.alpha;
+        ctx.fillStyle = ft.color;
+        ctx.font = "bold 13px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(ft.text, ft.x, ft.y);
+        ctx.restore();
+      }
+
+      // particles
+      for (const pa of particles) {
+        ctx.save();
+        ctx.globalAlpha = pa.alpha;
+        ctx.fillStyle = pa.color;
+        ctx.beginPath();
+        ctx.arc(pa.x, pa.y, pa.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // big win overlay
+      if (bigWinUntil > now) {
+        const t = (bigWinUntil - now) / 1300;
+        ctx.save();
+        ctx.globalAlpha = t * 0.7;
+        const radial = ctx.createRadialGradient(
+          width / 2, height / 2, 0,
+          width / 2, height / 2, width / 1.2
+        );
+        radial.addColorStop(0, "rgba(253, 224, 71, 0.9)");
+        radial.addColorStop(1, "rgba(0, 0, 0, 0)");
+        ctx.fillStyle = radial;
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.globalAlpha = t;
+        ctx.fillStyle = "#fef9c3";
+        ctx.font = "bold 24px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("BIG WIN!", width / 2, height / 2 - 20);
+        ctx.font = "bold 16px system-ui";
+        ctx.fillText(bigWinText, width / 2, height / 2 + 10);
+        ctx.restore();
+      }
+    }
+
+    // Animation / loop
+    function updateAnimation() {
+      if (balls.length > 0) {
+        const landed = [];
+        for (const ball of balls) {
+          if (!ball.active) continue;
+          ball.progress += ball.speed;
+          if (ball.progress >= ball.path.length - 1) {
+            ball.progress = ball.path.length - 1;
+            ball.active = false;
+            landed.push(ball);
+          }
+        }
+        if (landed.length > 0) {
+          for (const b of landed) handleBallLanded(b);
+          balls = balls.filter(b => b.active);
+        }
+      }
+
+      floatingTexts = floatingTexts.filter(ft => ft.alpha > 0);
+      for (const ft of floatingTexts) {
+        ft.y += ft.vy;
+        ft.alpha -= 0.02;
+      }
+
+      particles = particles.filter(pa => pa.alpha > 0);
+      for (const pa of particles) {
+        pa.x += pa.vx;
+        pa.y += pa.vy;
+        pa.vy += 0.02;
+        pa.alpha -= 0.03;
+      }
+
+      if (balls.length > 0) {
+        setStatus("الكرات تتحرك...", "animating");
+      } else if (cashedOut) {
+        setStatus("تم الكاش آوت", "finished");
+      } else if (balance < stakePerBall) {
+        setStatus("الرصيد أقل من قيمة الرهان", "finished");
+      } else if (!sessionToken) {
+        setStatus("جاري الاتصال بالسيرفر...", "idle");
+      } else {
+        setStatus("جاهز", "idle");
+      }
+    }
+
+    function handleBallLanded(ball) {
+      const slotIndex = ball.targetSlotIndex;
+      const multiplier = SLOT_MULTIPLIERS[slotIndex];
+
+      highlightSlotIndex = slotIndex;
+      highlightUntil = performance.now() + 1500;
+
+      const winAmount = ball.stake * multiplier;
+      const tx = (slotIndex + 0.5) * slotWidth;
+
+      if (winAmount > 0) {
+        animateBalanceTo(balance, 700);
+        createFloatingText(
+          tx,
+          slotY - 16,
+          "+" + winAmount.toFixed(2) + " د.ك",
+          "#bbf7d0"
+        );
+        addParticlesBurst(tx, slotY, "rgba(190,242,100,0.9)");
+        playSafe(sndLandSmall);
+        if (multiplier >= BIG_WIN_MULTIPLIER_THRESHOLD) {
+          triggerBigWin(multiplier, winAmount);
+        }
+      } else {
+        animateBalanceTo(balance, 400);
+        createFloatingText(
+          tx,
+          slotY - 16,
+          "٠ د.ك",
+          "#fca5a5"
+        );
+        addParticlesBurst(tx, slotY, "rgba(248,113,113,0.9)");
+        playSafe(sndLandZero);
+      }
+
+      updateUI();
+    }
+
+    function loop() {
+      updateAnimation();
+      drawBoard();
+      requestAnimationFrame(loop);
+    }
+
+    // ============================
+    // API helpers
+    // ============================
+    async function apiInitSession() {
+      try {
+        const res = await fetch("/api/init-session", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ session_token })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          showToast(data.error || "خطأ في تهيئة الجلسة", 2500);
+          return null;
+        }
+        balance = data.balance;
+        displayedBalance = data.balance;
+        ballsPlayed = data.balls_played;
+        cashedOut = data.cashed_out;
+        updateUI();
+        return data;
+      } catch (e) {
+        showToast("مشكلة اتصال بالسيرفر", 2500);
+        return null;
+      }
+    }
+
+    async function apiDrop() {
+      try {
+        const res = await fetch("/api/drop", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ session_token, stake: stakePerBall })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          showToast(data.detail || data.error || "خطأ أثناء إسقاط الكرة", 2500);
+          return null;
+        }
+        balance = data.balance;
+        displayedBalance = data.balance;
+        ballsPlayed = data.balls_played;
+        cashedOut = data.cashed_out;
+        updateUI();
+        return data;
+      } catch (e) {
+        showToast("مشكلة اتصال أثناء إسقاط الكرة", 2500);
+        return null;
+      }
+    }
+
+    async function apiCashout() {
+      try {
+        const res = await fetch("/api/cashout", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ session_token })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          showToast(data.detail || data.error || "لم يتم الكاش آوت", 2500);
+          return null;
+        }
+        balance = data.balance;
+        displayedBalance = data.balance;
+        cashedOut = data.cashed_out;
+        updateUI();
+        return data;
+      } catch (e) {
+        showToast("مشكلة اتصال أثناء الكاش آوت", 2500);
+        return null;
+      }
+    }
+
+    // ============================
+    // Game logic (مرتبطة بالباكند)
+    // ============================
+    function resetGameLocalOnly() {
+      // السيرفر هو اللي يقرر فعلياً إعادة الجلسة / منع التكرار
+      showToast("إعادة الجلسة تعتمد على الباكند (session جديدة).", 2500);
+    }
+
+    async function startDrop() {
+      if (cashedOut) {
+        showToast("تم الكاش آوت، ما تقدر تكمل نفس الجلسة.", 2200);
+        return;
+      }
+      if (balance < stakePerBall) {
+        showToast("رصيدك لا يكفي لإسقاط كرة بهذا الرهان.", 2200);
+        return;
+      }
+      if (!sessionToken) {
+        showToast("لسه ما تم تهيئة الجلسة.", 2000);
+        return;
+      }
+
+      dropBtn.disabled = true;
+      setTimeout(() => (dropBtn.disabled = false), 140);
+
+      playSafe(sndDrop);
+
+      const apiResult = await apiDrop();
+      if (!apiResult) return;
+
+      const multiplier = apiResult.multiplier;
+      const targetSlotIndex = chooseSlotForMultiplier(multiplier);
+      const pathsForSlot = precomputedPathsBySlot[targetSlotIndex];
+      const randomPath = pathsForSlot[Math.floor(Math.random() * pathsForSlot.length)];
+
+      const ball = {
+        path: randomPath,
+        progress: 0,
+        speed: 0.45 + Math.random() * 0.4,
+        active: true,
+        targetSlotIndex,
+        jitterPhase: Math.random() * Math.PI * 2,
+        stake: apiResult.stake   // السيرفر يرجّع stake الحقيقي
+      };
+
+      balls.push(ball);
+    }
+
+    async function cashOut() {
+      if (cashedOut) {
+        showToast("تم الكاش آوت من قبل.", 2200);
+        return;
+      }
+      if (balls.length > 0) {
+        showToast("انتظر الكرات تنزل قبل الكاش آوت.", 2200);
+        return;
+      }
+      await apiCashout();
+    }
+
+    function changeBet(delta) {
+      if (cashedOut || balls.length > 0) {
+        showToast("غيّر الرهان قبل إسقاط الكرات أو بعد جلسة جديدة.", 2000);
+        return;
+      }
+      let newBet = stakePerBall + delta;
+      newBet = clamp(newBet, MIN_BET, MAX_BET);
+      if (newBet === stakePerBall) return;
+      stakePerBall = newBet;
+      updateUI();
+    }
+
+    function init() {
+      generatePegs();
+      precomputePaths();
+      updateUI();
+      drawBoard();
+      loop();
+      apiInitSession(); // يجيب حالة اللاعب من السيرفر
+    }
+
+    dropBtn.addEventListener("click", startDrop);
+    resetBtn.addEventListener("click", resetGameLocalOnly);
+    cashoutBtn.addEventListener("click", cashOut);
+    betMinusBtn.addEventListener("click", () => changeBet(-1));
+    betPlusBtn.addEventListener("click", () => changeBet(1));
+
+    init();
+  </script>
+</body>
+</html>
