@@ -18,7 +18,7 @@ from contextlib import contextmanager
 # =========================
 # إعدادات عامة
 # =========================
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:pass@localhost:5432/plinko")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://crash_plane_db_user:EzM2x89JDAZCiOcutyajUy0Hs6UwCyHb@dpg-d31qndumcj7s738vo5c0-a.oregon-postgres.render.com:5432/crash_plane_db")
 
 INITIAL_BALANCE = 5.0
 MIN_BET = 1.0
@@ -39,12 +39,17 @@ MULTIPLIER_DISTRIBUTION = [
 # =========================
 # اتصال بالداتابيس (Connection Pool)
 # =========================
-pool: SimpleConnectionPool | None = None
+pool = None
 
 def init_pool():
     global pool
     if pool is None:
-        pool = SimpleConnectionPool(1, 20, DATABASE_URL)
+        pool = SimpleConnectionPool(
+            1,
+            20,
+            DATABASE_URL,
+            cursor_factory=RealDictCursor
+        )
 
 @contextmanager
 def get_db():
