@@ -18,7 +18,7 @@ from contextlib import contextmanager
 # =========================
 # إعدادات عامة
 # =========================
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://crash_plane_db_user:EzM2x89JDAZCiOcutyajUy0Hs6UwCyHb@dpg-d31qndumcj7s738vo5c0-a.oregon-postgres.render.com:5432/crash_plane_db")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 INITIAL_BALANCE = 5.0
 MIN_BET = 1.0
