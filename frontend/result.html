@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>نتيجة لعبة Plinko</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Cairo", system-ui, sans-serif;
+      background: radial-gradient(circle at top, #020617, #000);
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: rgba(15,23,42,0.95);
+      border-radius: 26px;
+      padding: 24px 20px 26px;
+      border: 1px solid #38bdf8;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 70px rgba(0,0,0,0.9);
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 22px;
+      color: #f472b6;
+    }
+    .name {
+      font-size: 18px;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+    .highlight {
+      font-size: 26px;
+      font-weight: 800;
+      color: #22c55e;
+      margin: 4px 0 2px;
+    }
+    .label {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-bottom: 16px;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .stat {
+      flex: 1;
+      background: #020617;
+      border-radius: 16px;
+      padding: 10px 8px;
+      border: 1px solid #1f2937;
+      font-size: 13px;
+    }
+    .stat span {
+      display: block;
+    }
+    .stat .v {
+      font-size: 17px;
+      font-weight: 700;
+      color: #e5e7eb;
+    }
+    button {
+      margin-top: 8px;
+      width: 100%;
+      padding: 10px 0;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg, #22c55e, #4ade80);
+      font-size: 15px;
+      font-weight: 700;
+      color: #04101f;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>نتيجة PLINKO</h1>
+    <div class="name" id="playerName">لاعب</div>
+
+    <div class="label">الرصيد النهائي بعد انتهاء الجلسة:</div>
+    <div class="highlight" id="finalBalance">0.000 دك</div>
+
+    <div class="stat-row">
+      <div class="stat">
+        <span>عدد الكرات</span>
+        <span class="v" id="ballsCount">0</span>
+      </div>
+      <div class="stat">
+        <span>متوسط الربح / الكرة</span>
+        <span class="v" id="avgPerBall">0.000 دك</span>
+      </div>
+    </div>
+
+    <button onclick="goHome()">رجوع لصفحة الدخول</button>
+  </div>
+
+<script>
+function getParam(name) {
+  const url = new URL(window.location.href);
+  return url.searchParams.get(name);
+}
+
+const name = getParam("name") || "لاعب";
+const balance = parseFloat(getParam("balance") || "0") || 0;
+const balls = parseInt(getParam("balls") || "0") || 0;
+
+document.getElementById("playerName").textContent = name;
+document.getElementById("finalBalance").textContent = balance.toFixed(3) + " دك";
+document.getElementById("ballsCount").textContent = balls.toString();
+
+const avg = balls > 0 ? (balance / balls) : 0;
+document.getElementById("avgPerBall").textContent = avg.toFixed(3) + " دك";
+
+function goHome() {
+  // ممكن تمسح التوكن إذا حاب تمنع الدخول مرة ثانية
+  // localStorage.removeItem("session_token");
+  window.location.href = "/";
+}
+</script>
+</body>
+</html>

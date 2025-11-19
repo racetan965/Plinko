@@ -1,383 +1,619 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Plinko Racetan</title>
 
-<title>Plinko Racetan</title>
+  <!-- Matter.js من CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
 
-<style>
+  <style>
+    * { box-sizing: border-box; }
     body {
-        margin: 0;
-        padding: 0;
-        background: #0a0f24;
-        font-family: "Cairo", sans-serif;
-        color: #fff;
-        text-align: center;
+      margin: 0;
+      padding: 0;
+      font-family: "Cairo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #020617 0%, #020617 35%, #000 100%);
+      color: #e5e7eb;
     }
-
-    .container {
-        max-width: 460px;
-        margin: 0 auto;
-        padding: 20px;
+    .wrapper {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding: 20px 12px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-
+    .panel {
+      width: 100%;
+      background: linear-gradient(145deg, #020617, #020617);
+      border-radius: 26px;
+      padding: 18px 16px 20px;
+      border: 1px solid rgba(56,189,248,0.5);
+      box-shadow: 0 20px 60px rgba(15,23,42,0.8);
+    }
     h1 {
-        color: #ff69b4;
-        margin-bottom: 15px;
-        letter-spacing: 2px;
+      margin: 0 0 6px;
+      font-size: 22px;
+      letter-spacing: 2px;
+      text-align: center;
+      color: #f472b6;
     }
-
-    .stats-box {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 16px;
+    .subtitle {
+      text-align: center;
+      font-size: 12px;
+      color: #9ca3af;
+      margin-bottom: 12px;
     }
-
-    .card {
-        background: #0f172a;
-        padding: 14px;
-        border-radius: 14px;
-        border: 1px solid #38bdf8;
-        width: 48%;
+    .stats-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
     }
-
-    .label {
-        color: #94a3b8;
-        font-size: 14px;
-        margin-bottom: 6px;
+    .stat-card {
+      flex: 1;
+      background: radial-gradient(circle at top left, #0b1120, #020617);
+      border-radius: 18px;
+      border: 1px solid #1d4ed8;
+      padding: 10px 10px 8px;
     }
-
-    .value {
-        font-size: 22px;
-        font-weight: bold;
-        color: #fff;
+    .stat-label {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-bottom: 4px;
     }
-
+    .stat-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #f9fafb;
+    }
     #connecting {
-        margin: 10px 0;
-        color: #a5f3fc;
-        font-size: 14px;
+      font-size: 12px;
+      color: #a5f3fc;
+      margin-bottom: 8px;
+      text-align: center;
     }
-
-    .game-board {
-        width: 100%;
-        height: 420px;
-        background: #08101d;
-        border-radius: 20px;
-        margin: 18px 0;
-        padding-top: 12px;
-        position: relative;
-        overflow: hidden;
+    .bet-row {
+      display: flex;
+      gap: 8px;
+      margin: 8px 0 10px;
+      justify-content: center;
     }
-
-    canvas {
-        width: 100%;
-        height: 100%;
-    }
-
-    .controls {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 10px;
-    }
-
-    button {
-        width: 48%;
-        padding: 12px;
-        border: none;
-        border-radius: 12px;
-        font-size: 18px;
-        cursor: pointer;
-        font-weight: bold;
-        color: #fff;
-    }
-
-    #dropBtn {
-        background: linear-gradient(135deg, #22c55e, #4ade80);
-    }
-
-    #cashoutBtn {
-        background: linear-gradient(135deg, #f97316, #fb923c);
-    }
-
-    #bets {
-        display: flex;
-        justify-content: center;
-        margin-top: 16px;
-        gap: 10px;
-    }
-
     .bet-btn {
-        padding: 10px 14px;
-        border-radius: 10px;
-        background: #1e293b;
-        border: 1px solid #475569;
-        cursor: pointer;
-        color: #fff;
-        font-weight: 600;
-        font-size: 15px;
+      flex: 1;
+      background: #020617;
+      border-radius: 999px;
+      border: 1px solid #475569;
+      padding: 7px 0;
+      font-size: 13px;
+      cursor: pointer;
+      color: #e5e7eb;
+      font-weight: 600;
     }
-
-    /* Toast */
+    .bet-btn.active {
+      border-color: #22c55e;
+      background: radial-gradient(circle at top, #16a34a, #166534);
+    }
+    .plinko-shell {
+      margin-top: 4px;
+      border-radius: 24px;
+      padding: 10px 10px 0;
+      background: radial-gradient(circle at top, #020617, #020617 40%, #020617 70%, #000 100%);
+      border: 1px solid rgba(148,163,184,0.3);
+    }
+    #plinko-container {
+      width: 100%;
+      height: 360px;
+      border-radius: 18px;
+      overflow: hidden;
+      position: relative;
+      background: radial-gradient(circle at top, #0f172a, #020617 60%, #000 100%);
+    }
+    .bins-row {
+      display: grid;
+      grid-template-columns: repeat(16, minmax(0,1fr));
+      gap: 1px;
+      margin-top: 8px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #1f2937;
+    }
+    .bin-slot {
+      padding: 4px 0 3px;
+      font-size: 10px;
+      font-weight: 800;
+      color: #f9fafb;
+      text-align: center;
+    }
+    .bin-small { background:#1d4ed8; }
+    .bin-mid { background:#0f766e; }
+    .bin-bad { background:#7f1d1d; }
+    .bin-zero { background:#020617; color:#9ca3af; }
+    .controls-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .btn-main {
+      flex: 1;
+      padding: 11px 8px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    #dropBtn {
+      background: linear-gradient(135deg, #22c55e, #4ade80);
+    }
+    #dropBtn:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+    #cashoutBtn {
+      background: linear-gradient(135deg, #f97316, #fb923c);
+    }
+    #cashoutBtn:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+    .footer {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #9ca3af;
+      text-align: center;
+    }
     #toast {
-        display: none;
-        position: fixed;
-        bottom: 25px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0,0,0,0.8);
-        padding: 14px 20px;
-        border-radius: 12px;
-        color: #fff;
-        font-size: 15px;
-        z-index: 9999;
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.85);
+      color: #f9fafb;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      z-index: 9999;
+      max-width: 90%;
     }
-</style>
+  </style>
 </head>
 
 <body>
-<div class="container">
-
+<div class="wrapper">
+  <div class="panel">
     <h1>PLINKO RACETAN</h1>
+    <div class="subtitle">
+      رصيد البداية ٥ دك — كل كرة تنزل حسب رهانك، والجائزة حسب المضاعِف في الأسفل.
+    </div>
 
-    <div class="stats-box">
-        <div class="card">
-            <div class="label">الرصيد الحالي</div>
-            <div class="value" id="balanceValue">0.00 دك</div>
-        </div>
-        <div class="card">
-            <div class="label">الكرات المستخدمة</div>
-            <div class="value" id="ballsValue">0 كرة</div>
-        </div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">الرصيد الحالي</div>
+        <div class="stat-value" id="balanceValue">0.000 دك</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">الكرات المستخدمة</div>
+        <div class="stat-value" id="ballsValue">0 كرة</div>
+      </div>
     </div>
 
     <div id="connecting">جارِ الاتصال بالسيرفر...</div>
 
-    <div id="bets">
-        <button class="bet-btn" onclick="setBet(1)">1 دك</button>
-        <button class="bet-btn" onclick="setBet(2)">+1 دك</button>
-        <button class="bet-btn" onclick="setBet(5)">+5 دك</button>
+    <div class="bet-row">
+      <button class="bet-btn active" data-bet="1">١ دك</button>
+      <button class="bet-btn" data-bet="2">٢ دك</button>
+      <button class="bet-btn" data-bet="5">٥ دك</button>
     </div>
 
-    <div class="game-board">
-        <canvas id="plinkoCanvas"></canvas>
+    <div class="plinko-shell">
+      <div id="plinko-container"></div>
+      <div class="bins-row" id="binsRow"></div>
     </div>
 
-    <div class="controls">
-        <button id="cashoutBtn" onclick="handleCashout()">كــاش آوت</button>
-        <button id="dropBtn" onclick="handleDrop()">نزل الكرة</button>
+    <div class="controls-row">
+      <button id="cashoutBtn" class="btn-main" onclick="handleCashout()">كــاش آوت</button>
+      <button id="dropBtn" class="btn-main" onclick="handleDrop()">نزل الكرة</button>
     </div>
 
+    <div class="footer">
+      أي تلاعب أو تحديث للصفحة لا يعطي جلسة جديدة لنفس الحساب.
+    </div>
+  </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-/* =============================
-      CONNECTION + SESSION
-============================= */
-
-// أقرأ session_token من LocalStorage
+/* =======================
+    SESSION & GLOBALS
+======================= */
 const session_token = localStorage.getItem("session_token");
-
 if (!session_token) {
-    window.location.href = "/";
+  window.location.href = "/";
 }
+
+const username = localStorage.getItem("username") || "لاعب";
 
 let balance = 0;
 let ballsPlayed = 0;
 let stakePerBall = 1;
+let cashedOut = false;
+let finished = false;
 
-// Toast
-function showToast(msg, duration = 2000) {
-    const t = document.getElementById("toast");
-    t.textContent = msg;
-    t.style.display = "block";
-    setTimeout(() => t.style.display = "none", duration);
+// multipliers على الترتيب من اليسار لليمين (16 خانة)
+const BIN_MULTIPLIERS = [1000, 50, 25, 10, 5, 2, 1, 0, 0, 1, 2, 5, 10, 25, 50, 1000];
+
+const toastEl = document.getElementById("toast");
+const connectingEl = document.getElementById("connecting");
+const balanceEl = document.getElementById("balanceValue");
+const ballsEl = document.getElementById("ballsValue");
+const dropBtn = document.getElementById("dropBtn");
+const cashoutBtn = document.getElementById("cashoutBtn");
+
+/* =======================
+          TOAST
+======================= */
+function showToast(msg, ms=2200) {
+  toastEl.textContent = msg;
+  toastEl.style.display = "block";
+  setTimeout(() => { toastEl.style.display = "none"; }, ms);
 }
 
-// تحديث الواجهة
+/* =======================
+      UPDATE UI
+======================= */
 function updateUI() {
-    document.getElementById("balanceValue").innerText = balance.toFixed(3) + " دك";
-    document.getElementById("ballsValue").innerText = ballsPlayed + " كرة";
+  balanceEl.textContent = balance.toFixed(3) + " دك";
+  ballsEl.textContent = ballsPlayed + " كرة";
+  if (cashedOut || finished) {
+    dropBtn.disabled = true;
+    cashoutBtn.disabled = true;
+  }
 }
-
-// إخفاء "جاري الاتصال"
 function hideConnecting() {
-    const el = document.getElementById("connecting");
-    if (el) el.style.display = "none";
+  if (connectingEl) connectingEl.style.display = "none";
 }
 
-// تغيير قيمة الرهان
-function setBet(v) {
-    stakePerBall = v;
-    showToast(`قيمة الرهان: ${v} دك`);
-}
+/* =======================
+         BET BUTTONS
+======================= */
+document.querySelectorAll(".bet-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".bet-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    stakePerBall = parseFloat(btn.dataset.bet);
+    showToast("قيمة الرهان: " + stakePerBall.toFixed(0) + " دك", 1500);
+  });
+});
 
-/* =============================
-          API CALLS
-============================= */
+/* =======================
+         BINS UI
+======================= */
+const binsRow = document.getElementById("binsRow");
+BIN_MULTIPLIERS.forEach(m => {
+  const div = document.createElement("div");
+  div.classList.add("bin-slot");
+  if (m === 0) div.classList.add("bin-zero");
+  else if (m <= 5) div.classList.add("bin-small");
+  else if (m <= 25) div.classList.add("bin-mid");
+  else div.classList.add("bin-bad");
+  div.textContent = m + "x";
+  binsRow.appendChild(div);
+});
 
+/* =======================
+        API CALLS
+======================= */
 async function initSession() {
-    try {
-        const res = await fetch("/api/init-session", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ session_token })
-        });
-
-        const data = await res.json();
-
-        if (!data.ok) {
-            showToast("خطأ في الجلسة");
-            return;
-        }
-
-        balance = data.balance;
-        ballsPlayed = data.balls_played;
-
-        updateUI();
-        hideConnecting();
-
-    } catch (err) {
-        showToast("خطأ اتصال بالسيرفر");
+  try {
+    const res = await fetch("/api/init-session", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ session_token })
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      showToast("لم يتم تهيئة الجلسة");
+      return;
     }
+    balance = data.balance;
+    ballsPlayed = data.balls_played;
+    cashedOut = data.cashed_out;
+    finished = data.finished;
+    updateUI();
+    hideConnecting();
+  } catch (e) {
+    showToast("مشكلة اتصال بالسيرفر");
+  }
 }
 
 async function apiDrop() {
-    try {
-        const res = await fetch("/api/drop", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                session_token,
-                stake: stakePerBall
-            })
-        });
-        const data = await res.json();
-
-        if (!data.ok) {
-            showToast(data.detail || "خطأ أثناء إسقاط الكرة");
-            return null;
-        }
-
-        balance = data.balance;
-        ballsPlayed = data.balls_played;
+  try {
+    const res = await fetch("/api/drop", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ session_token, stake: stakePerBall })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      const msg = data.detail || data.error || "لا يمكن إسقاط الكرة";
+      showToast(msg);
+      if ((data.detail && data.detail.includes("منتهية")) || (data.detail && data.detail.includes("الكاش"))) {
+        cashedOut = true;
+        finished = true;
         updateUI();
-
-        return data;
-
-    } catch (err) {
-        showToast("مشكلة اتصال");
-        return null;
+        goToResult();
+      }
+      dropBtn.disabled = false;
+      return null;
     }
+    balance = data.balance;
+    ballsPlayed = data.balls_played;
+    cashedOut = data.cashed_out;
+    finished = data.finished;
+    updateUI();
+    return data;
+  } catch (e) {
+    showToast("مشكلة اتصال");
+    dropBtn.disabled = false;
+    return null;
+  }
 }
 
 async function apiCashout() {
-    try {
-        const res = await fetch("/api/cashout", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ session_token })
-        });
+  try {
+    const res = await fetch("/api/cashout", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ session_token })
+    });
 
-        const data = await res.json();
+    const data = await res.json();
 
-        if (!data.ok) {
-            showToast("لم يتم الكاش آوت");
-            return;
-        }
-
-        balance = data.balance;
-        updateUI();
-
-        showToast("تم الكاش آوت!");
-    } catch (err) {
-        showToast("خطأ اتصال");
+    if (!res.ok || !data.ok) {
+      const msg = data.detail || data.error || "لم يتم الكاش آوت";
+      showToast(msg);
+      return;
     }
+
+    balance = data.balance;
+    cashedOut = data.cashed_out;
+    finished = data.finished;
+    updateUI();
+
+    // 🔥 تشغيل صوت الكاش آوت
+    sndCashout.currentTime = 0;
+    sndCashout.play().catch(()=>{});
+
+    showToast("تم الكاش آوت!");
+
+    // تحويل لصفحة النتيجة
+    goToResult();
+
+  } catch (e) {
+    showToast("مشكلة اتصال أثناء الكاش آوت");
+  }
 }
 
-/* =============================
-            ACTIONS
-============================= */
 
+/* =======================
+       RESULT PAGE
+======================= */
+function goToResult() {
+  const url = `/result.html?name=${encodeURIComponent(username)}&balance=${balance.toFixed(3)}&balls=${ballsPlayed}`;
+  window.location.href = url;
+}
+
+/* =======================
+        BUTTON ACTIONS
+======================= */
 async function handleDrop() {
-    const result = await apiDrop();
-    if (!result) return;
-    
-    // تشغيل صوت
-    playSoundDrop();
+  sndClick.currentTime = 0;
+    sndClick.play().catch(()=>{});
 
-    // إضافة الحركة
-    launchBallAnimation(result.multiplier);
+  if (cashedOut || finished) {
+    showToast("الجلسة منتهية");
+    return;
+  }
+  dropBtn.disabled = true;
+  const data = await apiDrop();
+  if (!data) return;
+  currentMultiplier = data.multiplier;
+  launchBallForMultiplier(currentMultiplier);
 }
-
 function handleCashout() {
-    apiCashout();
+  if (cashedOut) {
+    goToResult();
+    return;
+  }
+  apiCashout();
 }
 
-/* =============================
-          SOUNDS
-============================= */
+/* =======================
+        SOUNDS
+======================= */
 
-const sndDrop = new Audio("/sounds/drop.mp3");
-const sndSmall = new Audio("/sounds/land_small.mp3");
-const sndZero = new Audio("/sounds/land_zero.mp3");
-const sndBig = new Audio("/sounds/big_win.mp3");
+// 1) صوت زر "نزل الكرة"
+const sndClick = new Audio("/sounds/click.mp3");
 
-function playSoundDrop() { sndDrop.play(); }
-function playSmall() { sndSmall.play(); }
-function playZero() { sndZero.play(); }
-function playBig() { sndBig.play(); }
+// 2) صوت اصطدام الكرة بالمسمار
+const sndPin = new Audio("/sounds/pin_hit.mp3");
 
-/* =============================
-      SIMPLE BALL ANIMATION
-============================= */
+// 3) أصوات حسب خانة المضاعف النهائي
+const slotSounds = {
+    0:    new Audio("/sounds/slot_0.mp3"),
+    1:    new Audio("/sounds/slot_1.mp3"),
+    2:    new Audio("/sounds/slot_2.mp3"),
+    5:    new Audio("/sounds/slot_5.mp3"),
+    10:   new Audio("/sounds/slot_10.mp3"),
+    25:   new Audio("/sounds/slot_25.mp3"),
+    50:   new Audio("/sounds/slot_50.mp3"),
+    100:  new Audio("/sounds/slot_100.mp3"),
+    1000: new Audio("/sounds/slot_1000.mp3")
+};
 
-const canvas = document.getElementById("plinkoCanvas");
-const ctx = canvas.getContext("2d");
+// 4) صوت الكاش آوت
+const sndCashout = new Audio("/sounds/cashout.mp3");
 
-function resizeCanvas() {
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+/* =======================
+       MATTER.JS SETUP
+======================= */
+const { Engine, Render, Runner, Bodies, Composite, World, Events } = Matter;
+
+const engine = Engine.create();
+const world = engine.world;
+
+const container = document.getElementById("plinko-container");
+const width = container.clientWidth;
+const height = container.clientHeight;
+
+const render = Render.create({
+  element: container,
+  engine: engine,
+  options: {
+    width,
+    height,
+    background: "#020617",
+    wireframes: false,
+    pixelRatio: window.devicePixelRatio || 1
+  }
+});
+
+Render.run(render);
+const runner = Runner.create();
+Runner.run(runner, engine);
+
+// حدود
+const wallThickness = 30;
+const ground = Bodies.rectangle(width/2, height+10, width+60, 40, { isStatic: true });
+const leftWall = Bodies.rectangle(-wallThickness/2, height/2, wallThickness, height*2, { isStatic: true });
+const rightWall = Bodies.rectangle(width+wallThickness/2, height/2, wallThickness, height*2, { isStatic: true });
+
+World.add(world, [ground, leftWall, rightWall]);
+
+// مسامير
+const pegRadius = 4;
+const rows = 10;
+const cols = 13;
+const pegSpacingX = width / (cols + 1);
+const pegSpacingY = (height - 120) / (rows + 1);
+
+for (let row = 0; row < rows; row++) {
+  for (let col = 0; col < cols; col++) {
+    const offsetX = (row % 2 === 0) ? 0 : pegSpacingX / 2;
+    const x = (col + 1) * pegSpacingX + offsetX;
+    const y = (row + 1) * pegSpacingY + 30;
+    const peg = Bodies.circle(x, y, pegRadius, {
+      isStatic: true,
+      label: "peg",
+      render: { fillStyle: "#e5e7eb" }
+    });
+    World.add(world, peg);
+  }
 }
-resizeCanvas();
 
-function launchBallAnimation(multiplier) {
-    let y = 0;
-    const x = canvas.width / 2;
+// تقسيم الخانات في الأسفل (invisible walls بين الـ bins)
+const binCount = BIN_MULTIPLIERS.length;
+const binWidth = width / binCount;
+for (let i = 0; i <= binCount; i++) {
+  const x = i * binWidth;
+  const wall = Bodies.rectangle(
+    x,
+    height - 25,
+    4,
+    70,
+    { isStatic: true, render: { visible: false } }
+  );
+  World.add(world, wall);
+}
 
-    const interval = setInterval(() => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+// الكرة الحالية
+let currentBall = null;
+let currentMultiplier = 0;
+let landedHandled = false;
 
-        // draw ball
-        ctx.beginPath();
-        ctx.arc(x, y, 10, 0, Math.PI * 2);
-        ctx.fillStyle = "#4ade80";
-        ctx.fill();
+// إطلاق الكرة حسب الـ multiplier
+function launchBallForMultiplier(mult) {
+  playDrop();
 
-        y += 8;
+  const indexes = [];
+  BIN_MULTIPLIERS.forEach((m, i) => {
+    if (m === mult) indexes.push(i);
+  });
+  let targetIndex = 0;
+  if (indexes.length > 0) {
+    targetIndex = indexes[Math.floor(Math.random() * indexes.length)];
+  } else {
+    targetIndex = Math.floor(binCount / 2);
+  }
 
-        if (y > canvas.height - 40) {
-            clearInterval(interval);
+  const centerX = (targetIndex + 0.5) * binWidth;
 
-            if (multiplier === 0) playZero();
-            else if (multiplier <= 5) playSmall();
-            else playBig();
+  if (currentBall) {
+    Composite.remove(world, currentBall);
+    currentBall = null;
+  }
+  landedHandled = false;
 
-            showToast(`ربحت ${multiplier}x`);
+  currentBall = Bodies.circle(centerX, 10, 8, {
+    restitution: 0.45,
+    friction: 0.02,
+    density: 0.002,
+    render: {
+      fillStyle: "#22c55e"
+    }
+  });
+  World.add(world, currentBall);
+
+  // إعطاء دفعة بسيطة
+  Matter.Body.setVelocity(currentBall, { x: (Math.random() - 0.5) * 1.2, y: 0 });
+}
+
+// مراقبة وصول الكرة للأسفل لتشغيل الصوت وفتح زر الإسقاط
+Events.on(engine, "afterUpdate", () => {
+  if (!currentBall) return;
+
+  if (!landedHandled && currentBall.position.y > height - 40) {
+      landedHandled = true;
+
+      const m = currentMultiplier;
+
+      // تشغيل الصوت حسب المضاعف
+      if (slotSounds[m]) {
+          slotSounds[m].currentTime = 0;
+          slotSounds[m].play().catch(()=>{});
+      }
+
+      showToast(`المضاعِف: ${m}x`, 1800);
+
+      setTimeout(() => {
+          dropBtn.disabled = false;
+      }, 400);
+  }
+
+  if (currentBall.position.y > height + 80) {
+    Composite.remove(world, currentBall);
+    currentBall = null;
+  }
+});
+Events.on(engine, "collisionStart", (event) => {
+    for (let pair of event.pairs) {
+        const { bodyA, bodyB } = pair;
+
+        if (bodyA.label === "peg" || bodyB.label === "peg") {
+            sndPin.currentTime = 0;
+            sndPin.play().catch(()=>{});
         }
-    }, 16);
-}
+    }
+});
 
-/* =============================
-         START APP
-============================= */
-
+// تهيئة الجلسة عند بداية الصفحة
 initSession();
-
 </script>
-
 </body>
 </html>
